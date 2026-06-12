@@ -294,12 +294,47 @@
   }
   footer span { color: var(--dorado); }
 </style>
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAdTCV06Uu2uuCxjUA18xz1vP2zFH1kmxs",
+      authDomain: "ahorro-cafetero.firebaseapp.com",
+      databaseURL: "https://ahorro-cafetero-default-rtdb.firebaseio.com",
+      projectId: "ahorro-cafetero",
+      storageBucket: "ahorro-cafetero.firebasestorage.app",
+      messagingSenderId: "1057412263833",
+      appId: "1:1057412263833:web:48b9d7410ab786b58e78a8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const stateRef = ref(db, 'ahorro/state');
+
+    // Expose to global scope
+    window._fbSet = (state) => set(stateRef, state);
+    window._fbListen = (callback) => onValue(stateRef, (snap) => {
+      callback(snap.exists() ? snap.val() : {});
+    });
+    window._firebaseReady = true;
+
+    // Notify app that Firebase is ready
+    window.dispatchEvent(new Event('firebase-ready'));
+    // Update sync indicator
+    onValue(stateRef, () => {
+      const el = document.getElementById('sync-status');
+      if (el) el.textContent = '🟢 Sincronizado con tu pareja';
+    }, { onlyOnce: true });
+  </script>
 </head>
 <body>
 
 <header>
   <h1>🌿 Viaje al Eje Cafetero</h1>
   <p>Parque del Café · Valle del Cocora · Salento</p>
+  <p id="sync-status" style="font-size:11px;margin-top:6px;opacity:0.7;">🔄 Conectando...</p>
 </header>
 
 <div class="tabs">
@@ -501,11 +536,15 @@
     return '$' + n.toLocaleString('es-CO');
   }
 
+  // Local cache of state (synced with Firebase)
+  window._state = {};
+
   function loadState() {
-    try { return JSON.parse(localStorage.getItem('eje-ahorro') || '{}'); } catch { return {}; }
+    return window._state || {};
   }
   function saveState(state) {
-    try { localStorage.setItem('eje-ahorro', JSON.stringify(state)); } catch {}
+    window._state = state;
+    if (window._fbSet) window._fbSet(state);
   }
 
   function toggleCell(cell) {
@@ -546,7 +585,8 @@
 
   function resetAll() {
     if (!confirm('¿Seguro que quieres reiniciar el plan de ahorro?')) return;
-    try { localStorage.removeItem('eje-ahorro'); } catch {}
+    window._state = {};
+    if (window._fbSet) window._fbSet({});
     document.querySelectorAll('.cell').forEach(c => c.classList.remove('checked'));
     updateStats();
   }
@@ -579,8 +619,34 @@
     event.currentTarget.classList.add('active');
   }
 
-  buildGrid();
   buildSchedule();
+
+  // Wait for Firebase then sync state
+  function initWithFirebase() {
+    window._fbListen((remoteState) => {
+      window._state = remoteState;
+      // Update all cells visually
+      document.querySelectorAll('.cell').forEach(cell => {
+        if (remoteState[cell.dataset.key]) {
+          cell.classList.add('checked');
+        } else {
+          cell.classList.remove('checked');
+        }
+      });
+      updateStats();
+    });
+  }
+
+  if (window._firebaseReady) {
+    buildGrid();
+    initWithFirebase();
+  } else {
+    // Render grid immediately with local state, then sync when Firebase loads
+    buildGrid();
+    window.addEventListener('firebase-ready', () => {
+      initWithFirebase();
+    });
+  }
 </script>
 
 <script>

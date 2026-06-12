@@ -2,7 +2,7 @@
   "name": "Viaje Eje Cafetero",
   "short_name": "Eje Cafetero",
   "description": "Presupuesto y plan de ahorro para el viaje al Eje Cafetero",
-  "start_url": "/",
+  "start_url": "/AHORRO-PROGRAMADO/",
   "display": "standalone",
   "background_color": "#2d6a4f",
   "theme_color": "#2d6a4f",
@@ -20,5 +20,6 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "scope": "/AHORRO-PROGRAMADO/"
 }

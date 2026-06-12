@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2d6a4f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Eje Cafetero">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>Viaje Eje Cafetero 🌿</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --cafe: #4a2c0a;
+    --verde: #2d6a4f;
+    --verde-claro: #52b788;
+    --crema: #fdf6ec;
+    --dorado: #c9a84c;
+    --tierra: #8b5e3c;
+    --blanco: #ffffff;
+    --gris: #f0ebe3;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--crema);
+    color: var(--cafe);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--verde) 0%, var(--cafe) 100%);
+    padding: 40px 24px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '☕🌿🏔️';
+    position: absolute;
+    font-size: 80px;
+    opacity: 0.07;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    letter-spacing: 20px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 6vw, 48px);
+    color: var(--crema);
+    line-height: 1.1;
+    position: relative;
+  }
+  header p {
+    color: var(--verde-claro);
+    margin-top: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: var(--cafe);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 14px 8px;
+    background: none;
+    border: none;
+    color: rgba(253,246,236,0.55);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.4px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    color: var(--dorado);
+    border-bottom-color: var(--dorado);
+  }
+
+  /* SECTIONS */
+  .section { display: none; padding: 24px 16px 40px; max-width: 700px; margin: 0 auto; }
+  .section.active { display: block; }
+
+  /* PRESUPUESTO */
+  .card {
+    background: var(--blanco);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(74,44,10,0.08);
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--verde);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .budget-table { width: 100%; border-collapse: collapse; }
+  .budget-table tr:not(:last-child) td { border-bottom: 1px solid var(--gris); }
+  .budget-table td { padding: 9px 4px; font-size: 14px; }
+  .budget-table td:last-child { text-align: right; font-weight: 600; color: var(--tierra); }
+  .budget-table tr.total td {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cafe);
+    border-top: 2px solid var(--dorado);
+    padding-top: 12px;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--gris);
+    color: var(--tierra);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .highlight-box {
+    background: linear-gradient(135deg, var(--verde) 0%, #1b4332 100%);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    color: var(--crema);
+    margin-top: 4px;
+  }
+  .highlight-box .amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 38px;
+    font-weight: 900;
+    color: var(--dorado);
+    display: block;
+  }
+  .highlight-box .label { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+
+  /* AHORRO */
+  .savings-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .meta-card {
+    background: var(--blanco);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(74,44,10,0.07);
+  }
+  .meta-card .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--verde);
+  }
+  .meta-card .lbl { font-size: 11px; color: var(--tierra); margin-top: 2px; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .progress-bar-bg {
+    background: var(--gris);
+    border-radius: 99px;
+    height: 14px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--verde-claro), var(--dorado));
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+
+  /* GRID DE AHORRO */
+  .grid-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    color: var(--cafe);
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .grid-subtitle { font-size: 12px; color: var(--tierra); text-align: center; margin-bottom: 16px; }
+
+  .savings-grid {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .week-row {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 6px;
+    align-items: center;
+  }
+  .week-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--tierra);
+    text-align: right;
+    padding-right: 6px;
+  }
+  .week-cells { display: flex; gap: 5px; flex-wrap: wrap; }
+  .cell {
+    flex: 1;
+    min-width: 48px;
+    height: 40px;
+    border-radius: 8px;
+    border: 2px solid var(--gris);
+    background: var(--blanco);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--tierra);
+    user-select: none;
+    position: relative;
+  }
+  .cell:hover { border-color: var(--verde-claro); transform: scale(1.05); }
+  .cell.checked {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: var(--crema);
+  }
+  .cell.checked::after {
+    content: '✓';
+    font-size: 14px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .cell.checked .cell-amount { opacity: 0; }
+  .cell-amount { font-size: 9px; font-weight: 600; }
+
+  .reset-btn {
+    display: block;
+    margin: 8px auto 0;
+    background: none;
+    border: 1.5px solid var(--tierra);
+    color: var(--tierra);
+    border-radius: 8px;
+    padding: 7px 20px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { background: var(--tierra); color: var(--crema); }
+
+  /* DISTRIBUCION */
+  .dist-card {
+    background: var(--blanco);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(74,44,10,0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .dist-card .week-num { font-size: 12px; color: var(--tierra); }
+  .dist-card .dist-date { font-size: 13px; font-weight: 600; color: var(--cafe); }
+  .dist-card .dist-amount { font-size: 16px; font-weight: 700; color: var(--verde); font-family: 'Playfair Display', serif; }
+
+  footer {
+    background: var(--cafe);
+    color: rgba(253,246,236,0.6);
+    text-align: center;
+    padding: 18px;
+    font-size: 12px;
+  }
+  footer span { color: var(--dorado); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌿 Viaje al Eje Cafetero</h1>
+  <p>Parque del Café · Valle del Cocora · Salento</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('presupuesto')">☕ Presupuesto</button>
+  <button class="tab-btn" onclick="showTab('ahorro')">🐷 Plan de Ahorro</button>
+  <button class="tab-btn" onclick="showTab('distribucion')">📅 Semanas</button>
+</div>
+
+<!-- PRESUPUESTO -->
+<div class="section active" id="presupuesto">
+  <div class="card">
+    <div class="card-title">🚌 Transporte</div>
+    <table class="budget-table">
+      <tr><td>Pasajes de bus (ida y vuelta)</td><td>$188.000</td></tr>
+      <tr><td>Transporte Filandia → Parque del Café</td><td>$46.000</td></tr>
+      <tr><td>Transporte Filandia → Valle del Cocora</td><td>$46.000</td></tr>
+      <tr><td>Transporte Filandia → Salento</td><td>$48.000</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏨 Alojamiento</div>
+    <table class="budget-table">
+      <tr><td>Estadía 3 noches <span class="badge">2 personas</span></td><td>$461.361</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎡 Parque del Café</div>
+    <table class="budget-table">
+      <tr><td>Entradas al parque</td><td>$180.000</td></tr>
+      <tr><td>Almuerzo y hidratación</td><td>$150.000</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏔️ Valle del Cocora</div>
+    <table class="budget-table">
+      <tr><td>Entrada al mirador VDC</td><td>$60.000</td></tr>
+      <tr><td>Almuerzo y hidratación</td><td>$90.000</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏘️ Salento</div>
+    <table class="budget-table">
+      <tr><td>Comida típica</td><td>$60.000</td></tr>
+      <tr><td>Regalos / recuerdos</td><td>$100.000</td></tr>
+    </table>
+  </div>
+
+  <div class="highlight-box">
+    <span class="amount">$1.429.361</span>
+    <div class="label">Total estimado del viaje para 2 personas</div>
+  </div>
+</div>
+
+<!-- AHORRO -->
+<div class="section" id="ahorro">
+  <div class="savings-meta">
+    <div class="meta-card">
+      <div class="num">24</div>
+      <div class="lbl">Semanas de ahorro</div>
+    </div>
+    <div class="meta-card">
+      <div class="num" id="checked-count">0</div>
+      <div class="lbl">Semanas completadas</div>
+    </div>
+    <div class="meta-card">
+      <div class="num" id="saved-amount">$0</div>
+      <div class="lbl">Ahorrado hasta ahora</div>
+    </div>
+    <div class="meta-card">
+      <div class="num" id="remaining-amount">$1.500.000</div>
+      <div class="lbl">Por ahorrar</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Progreso</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <p class="grid-title">🐷 Plan de Ahorro</p>
+  <p class="grid-subtitle">Toca cada casilla cuando hayas guardado ese monto. ¡Meta: $1.500.000!</p>
+
+  <div class="savings-grid" id="savings-grid"></div>
+
+  <button class="reset-btn" onclick="resetAll()">Reiniciar todo</button>
+</div>
+
+<!-- DISTRIBUCIÓN -->
+<div class="section" id="distribucion">
+  <div class="card">
+    <div class="card-title">📅 Calendario de ahorro</div>
+    <p style="font-size:13px;color:var(--tierra);margin-bottom:14px;">Del 15 de junio al 1 de diciembre de 2026 — 24 semanas, ahorrando <strong>$62.500</strong> por semana.</p>
+    <div id="schedule-list"></div>
+  </div>
+</div>
+
+<footer>Hecho con ❤️ para el viaje de <span>ustedes dos</span> · Eje Cafetero 2026</footer>
+
+<script>
+  const META = 1500000;
+  const WEEKS = 24;
+  const START = new Date('2026-06-15');
+
+  // Amounts per cell (9 per row, repeating pattern like the reference image)
+  const PATTERN = [2000, 5000, 10000, 20000, 30000, 50000, 62500, 62500, 62500];
+
+  // Build weeks: each week has a date range and one target amount
+  function getWeekData() {
+    const weeks = [];
+    let accumulated = 0;
+    for (let i = 0; i < WEEKS; i++) {
+      const start = new Date(START);
+      start.setDate(START.getDate() + i * 7);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      const amount = Math.round(META / WEEKS); // ~62,500
+      accumulated += amount;
+      weeks.push({ index: i, start, end, amount, accumulated });
+    }
+    return weeks;
+  }
+
+  const weeks = getWeekData();
+
+  // Build savings grid: rows = weeks, cells = denomination options
+  const DENOMINATIONS = [2000, 5000, 10000, 20000, 30000, 50000, 62500];
+
+  function buildGrid() {
+    const grid = document.getElementById('savings-grid');
+    const state = loadState();
+
+    grid.innerHTML = '';
+    weeks.forEach((w, wi) => {
+      const row = document.createElement('div');
+      row.className = 'week-row';
+
+      const lbl = document.createElement('div');
+      lbl.className = 'week-label';
+      lbl.textContent = `Sem ${wi + 1}`;
+      row.appendChild(lbl);
+
+      const cells = document.createElement('div');
+      cells.className = 'week-cells';
+
+      // For each week, show cells with denomination options
+      const weekDenoms = getWeekDenoms(wi);
+      weekDenoms.forEach((denom, ci) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell' + (state[`${wi}-${ci}`] ? ' checked' : '');
+        cell.dataset.key = `${wi}-${ci}`;
+        cell.dataset.amount = denom;
+
+        const amtEl = document.createElement('span');
+        amtEl.className = 'cell-amount';
+        amtEl.textContent = formatShort(denom);
+        cell.appendChild(amtEl);
+
+        cell.addEventListener('click', () => toggleCell(cell));
+        cells.appendChild(cell);
+      });
+
+      row.appendChild(cells);
+      grid.appendChild(row);
+    });
+
+    updateStats();
+  }
+
+  function getWeekDenoms(weekIndex) {
+    // Each week: a mix of small and large denominations that sum to ~62,500
+    // Offer 4 cells per week with the weekly target split
+    // E.g. week target = 62,500 → cells: [12500, 12500, 12500, 25000]
+    const wkAmt = Math.round(META / WEEKS);
+    const combos = [
+      [10000, 10000, 20000, wkAmt - 40000],
+      [5000, 10000, 20000, wkAmt - 35000],
+      [2000, 10000, 20000, wkAmt - 32000],
+      [5000, 5000, 20000, wkAmt - 30000],
+    ];
+    const combo = combos[weekIndex % combos.length];
+    return combo.map(v => Math.max(v, 2000));
+  }
+
+  function formatShort(n) {
+    if (n >= 1000) return '$' + (n / 1000).toFixed(0) + 'k';
+    return '$' + n;
+  }
+
+  function formatCOP(n) {
+    return '$' + n.toLocaleString('es-CO');
+  }
+
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem('eje-ahorro') || '{}'); } catch { return {}; }
+  }
+  function saveState(state) {
+    try { localStorage.setItem('eje-ahorro', JSON.stringify(state)); } catch {}
+  }
+
+  function toggleCell(cell) {
+    const state = loadState();
+    const key = cell.dataset.key;
+    if (state[key]) {
+      delete state[key];
+      cell.classList.remove('checked');
+    } else {
+      state[key] = true;
+      cell.classList.add('checked');
+    }
+    saveState(state);
+    updateStats();
+  }
+
+  function updateStats() {
+    const state = loadState();
+    let total = 0;
+    let count = 0;
+    const checkedWeeks = new Set();
+
+    document.querySelectorAll('.cell').forEach(cell => {
+      if (state[cell.dataset.key]) {
+        total += parseInt(cell.dataset.amount);
+        checkedWeeks.add(cell.dataset.key.split('-')[0]);
+      }
+    });
+    count = checkedWeeks.size;
+
+    const pct = Math.min(100, Math.round((total / META) * 100));
+    document.getElementById('checked-count').textContent = count;
+    document.getElementById('saved-amount').textContent = formatCOP(total);
+    document.getElementById('remaining-amount').textContent = formatCOP(Math.max(0, META - total));
+    document.getElementById('progress-pct').textContent = pct + '%';
+    document.getElementById('progress-bar').style.width = pct + '%';
+  }
+
+  function resetAll() {
+    if (!confirm('¿Seguro que quieres reiniciar el plan de ahorro?')) return;
+    try { localStorage.removeItem('eje-ahorro'); } catch {}
+    document.querySelectorAll('.cell').forEach(c => c.classList.remove('checked'));
+    updateStats();
+  }
+
+  // Build schedule list
+  function buildSchedule() {
+    const list = document.getElementById('schedule-list');
+    weeks.forEach((w, i) => {
+      const d = document.createElement('div');
+      d.className = 'dist-card';
+      d.innerHTML = `
+        <div>
+          <div class="week-num">Semana ${i + 1}</div>
+          <div class="dist-date">${fmt(w.start)} – ${fmt(w.end)}</div>
+        </div>
+        <div class="dist-amount">${formatCOP(w.amount)}</div>
+      `;
+      list.appendChild(d);
+    });
+  }
+
+  function fmt(d) {
+    return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+  }
+
+  function showTab(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  buildGrid();
+  buildSchedule();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('SW registrado'))
+        .catch(e => console.log('SW error', e));
+    });
+  }
+</script>
+</body>
+</html>
